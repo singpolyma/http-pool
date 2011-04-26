@@ -1,0 +1,11 @@
+Designed to be run with thin, but should work with any rack + eventmachine.
+
+Settings are hardcoded at the top of config.ru just now.
+
+This server takes a shell command that starts some other HTTP server, the minimum number of child servers to run, and the maximum number of child servers to run.  It round-robins inbound requests between the available children.  If it runs out of children and does not yet have max children, it spawns a new child.  If a child dies, it is aware of that and stops routing requests to that child.  If enough children die such that there are less than min children running, it will spawn more so that it always has min children.
+
+TCP ports for spawned children are allocated in asceding order from a specified starting point.  If a tried port is already in use, that child should die and the next port number will be tried.
+
+The command for the child server must contain the string $PORT, which will be replaced with the actual port that child should listen on.
+
+The command for the child server must not cause the child to detach or daemonize.  This would cause the parent to detect the child as exited and remove it from the pool.
